@@ -121,7 +121,7 @@ public class BrickGrid {
     public BrickGrid(int width, int maxHeight) {
         this.width = width;
         this.maxHeight = maxHeight;
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("liberation-mono.ttf"));
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("DroidSansMono.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = Gdx.graphics.getWidth() / 20;
         parameter.color = Color.WHITE;
