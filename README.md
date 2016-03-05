@@ -6,3 +6,5 @@ The only difference is that the balls in this game are affected by gravity. (Als
 
 The code is pretty terrible, as most of it was written hastily in one night.
 Still, I hope it may be useful.
+
+Licensed under the Apache License, Version 2.0.
