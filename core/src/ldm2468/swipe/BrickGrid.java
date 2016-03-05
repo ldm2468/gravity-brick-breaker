@@ -29,7 +29,7 @@ public class BrickGrid {
     public Array<int[]> bricks = new Array<int[]>();
     public boolean isRunning = false, fastForward = false;
     public World world;
-    int width, maxHeight, max = 0;
+    int width, maxHeight, max = 0, exp = 0;
     Array<Body> circles = new Array<Body>(false, 50);
     Array<Body> toDestroy = new Array<Body>(false, 10);
     int ballNum = 1;
@@ -38,7 +38,7 @@ public class BrickGrid {
     float swipeX = 0, swipeY = 0;
     BitmapFont font;
     Preferences highScore = Gdx.app.getPreferences("highScore"), current = Gdx.app.getPreferences("current");
-    int high = 0;
+    int highestMax = 0, highestExp = 0;
     int simulationHit = 2;
     ContactListener defaultContactListener = new ContactListener() {
         @Override
@@ -68,6 +68,12 @@ public class BrickGrid {
                 return;
             }
             bricks.get(c.i)[c.j]--;
+            exp++;
+            if (exp > highestExp) {
+                highestExp = exp;
+                highScore.putInteger("exp", exp);
+                highScore.flush();
+            }
             if (bricks.get(c.i)[c.j] == 0)
                 toDestroy.add(correct.getBody());
         }
@@ -117,12 +123,13 @@ public class BrickGrid {
         this.maxHeight = maxHeight;
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("liberation-mono.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = Gdx.graphics.getWidth() / 16;
+        parameter.size = Gdx.graphics.getWidth() / 20;
         parameter.color = Color.WHITE;
         font = generator.generateFont(parameter);
         generator.dispose();
         world = new World(new Vector2(0, G), true);
-        high = highScore.getInteger("score");
+        highestMax = highScore.getInteger("score");
+        highestExp = highScore.getInteger("exp");
     }
 
     public void loadSave() {
@@ -276,9 +283,9 @@ public class BrickGrid {
     }
 
     public void push() {
-        if (++max > high) {
-            high = max;
-            highScore.putInteger("score", high);
+        if (++max > highestMax) {
+            highestMax = max;
+            highScore.putInteger("score", highestMax);
             highScore.flush();
         }
 
@@ -378,11 +385,13 @@ public class BrickGrid {
             float x = oldCircleStart / WORLD_WIDTH * (maxX - minX) + minX - layout.width / 2;
             font.draw(sb, layout, x, minY - 10);
         }
-        font.setColor(max == high ? Color.LIME : Color.BLACK);
-        GlyphLayout layout = new GlyphLayout(font, "Score: " + max);
+        font.setColor(max == highestMax ? Color.LIME : Color.BLACK);
+        GlyphLayout layout = new GlyphLayout(font, "Level: " + max + " (best: " + highestMax + ")");
         float x = (maxX + minX) / 2 + minX - layout.width / 2;
         font.draw(sb, layout, x, maxY + layout.height + 10);
-        layout = new GlyphLayout(font, "High Score: " + high);
+
+        font.setColor(exp == highestExp ? Color.LIME : Color.BLACK);
+        layout = new GlyphLayout(font, "Score: " + exp + " (best: " + highestExp + ")");
         x = (maxX + minX) / 2 + minX - layout.width / 2;
         font.draw(sb, layout, x, maxY + layout.height * 2 + 30);
     }
