@@ -11,6 +11,18 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class Main extends ApplicationAdapter {
     public static SwipeManager swipeManager;
+    public static GooglePlay googlePlay;
+    public static final String
+            A_PACIFIST = "CgkIlcaq894XEAIQAg",
+            A_10KP = "CgkIlcaq894XEAIQAw",
+            A_100KP = "CgkIlcaq894XEAIQBA",
+            A_500KP = "CgkIlcaq894XEAIQBQ",
+            A_LV_100 = "CgkIlcaq894XEAIQBg",
+            A_LV_300 = "CgkIlcaq894XEAIQBw",
+            A_LV_500 = "CgkIlcaq894XEAIQCA",
+            L_SCORE = "CgkIlcaq894XEAIQAQ",
+            L_LV = "CgkIlcaq894XEAIQCQ";
+
     ShapeRenderer sr;
     SpriteBatch batch;
     BrickGrid brickGrid;
@@ -28,6 +40,7 @@ public class Main extends ApplicationAdapter {
         Gdx.input.setInputProcessor(swipeManager);
         Gdx.graphics.setContinuousRendering(false);
         Gdx.graphics.requestRendering();
+        //googlePlay.login();
     }
 
     @Override
@@ -38,9 +51,15 @@ public class Main extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.S))
             brickGrid.push();
         //process swipe
-        if (swipeManager.justDragged() && !brickGrid.isRunning)
-            brickGrid.swipe((swipeManager.x2 - swipeManager.x1) / 2f, (swipeManager.y2 - swipeManager.y1) / 2f);
-
+        if (swipeManager.justDragged()) {
+            if (swipeManager.y1 <= brickGrid.playBarHeight && swipeManager.y2 <= brickGrid.playBarHeight) {
+                if (swipeManager.x1 <= Gdx.graphics.getWidth() / 2 && swipeManager.x2 <= Gdx.graphics.getWidth() / 2)
+                    googlePlay.showAchievements();
+                else if (swipeManager.x1 >= Gdx.graphics.getWidth() / 2 && swipeManager.x2 >= Gdx.graphics.getWidth() / 2)
+                    googlePlay.showLeaderboards();
+            } else if (!brickGrid.isRunning)
+                brickGrid.swipe((swipeManager.x2 - swipeManager.x1) / 2f, (swipeManager.y2 - swipeManager.y1) / 2f);
+        }
         //draw
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -52,18 +71,28 @@ public class Main extends ApplicationAdapter {
         //process drag
         brickGrid.fastForward = false;
         if (swipeManager.isDragging()) {
-            if (brickGrid.isRunning) {
-                brickGrid.fastForward = true;
-            } else {
-                sr.setColor(100f / 255, 0.5f, 1, 0.3f);
-                if ((swipeManager.y2 - swipeManager.y1) / 2f < 40) {
-                    sr.setColor(1, 0.5f, 100f / 255f, 0.3f);
+            if (swipeManager.y1 > brickGrid.playBarHeight) {
+                if (brickGrid.isRunning) {
+                    brickGrid.fastForward = true;
+                } else {
+                    sr.setColor(100f / 255, 0.5f, 1, 0.3f);
+                    if ((swipeManager.y2 - swipeManager.y1) / 2f < 40)
+                        sr.setColor(1, 0.5f, 100f / 255f, 0.3f);
+                    sr.circle(swipeManager.x1, swipeManager.y1, 4);
+                    sr.rectLine(swipeManager.x1, swipeManager.y1, swipeManager.x2, swipeManager.y2, 4);
+                    brickGrid.drawSimulation(sr, Gdx.graphics.getWidth() / 2 - screenSize / 2, Gdx.graphics.getWidth() / 2 + screenSize / 2,
+                            Gdx.graphics.getHeight() / 2 - screenSize / 2, Gdx.graphics.getHeight() / 2 + screenSize / 2,
+                            (swipeManager.x2 - swipeManager.x1) / 2f, (swipeManager.y2 - swipeManager.y1) / 2f);
                 }
-                sr.circle(swipeManager.x1, swipeManager.y1, 4);
-                sr.rectLine(swipeManager.x1, swipeManager.y1, swipeManager.x2, swipeManager.y2, 4);
-                brickGrid.drawSimulation(sr, Gdx.graphics.getWidth() / 2 - screenSize / 2, Gdx.graphics.getWidth() / 2 + screenSize / 2,
-                        Gdx.graphics.getHeight() / 2 - screenSize / 2, Gdx.graphics.getHeight() / 2 + screenSize / 2,
-                        (swipeManager.x2 - swipeManager.x1) / 2f, (swipeManager.y2 - swipeManager.y1) / 2f);
+            } else if (swipeManager.y2 <= brickGrid.playBarHeight) {
+                if (swipeManager.y1 <= brickGrid.playBarHeight && swipeManager.y2 <= brickGrid.playBarHeight) {
+                    sr.setColor(0.5f, 0.5f, 0.5f, 0.2f);
+                    if (swipeManager.x1 <= Gdx.graphics.getWidth() / 2 && swipeManager.x2 <= Gdx.graphics.getWidth() / 2) {
+                        sr.rect(0, 0, Gdx.graphics.getWidth() / 2, brickGrid.playBarHeight);
+                    } else if (swipeManager.x1 >= Gdx.graphics.getWidth() / 2 && swipeManager.x2 >= Gdx.graphics.getWidth() / 2) {
+                        sr.rect(Gdx.graphics.getWidth() / 2, 0, Gdx.graphics.getWidth(), brickGrid.playBarHeight);
+                    }
+                }
             }
         } else if (!brickGrid.isRunning) {
             Gdx.graphics.setContinuousRendering(false);
@@ -81,6 +110,8 @@ public class Main extends ApplicationAdapter {
         if (brickGrid.bricks.size == brickGrid.maxHeight) {
             for (int i : brickGrid.bricks.get(0)) {
                 if (i > 0) {
+                    if (brickGrid.exp == 0)
+                        googlePlay.unlockAchievement(A_PACIFIST);
                     //die
                     brickGrid = new BrickGrid(WIDTH, HEIGHT);
                     brickGrid.push();

@@ -40,6 +40,7 @@ public class BrickGrid {
     Preferences highScore = Gdx.app.getPreferences("highScore"), current = Gdx.app.getPreferences("current");
     int highestMax = 0, highestExp = 0;
     int simulationHit = 2;
+    public int playBarHeight;
     ContactListener defaultContactListener = new ContactListener() {
         @Override
         public void beginContact(Contact contact) {
@@ -73,6 +74,12 @@ public class BrickGrid {
                 highestExp = exp;
                 highScore.putInteger("exp", exp);
                 highScore.flush();
+                if (exp == 10000)
+                    Main.googlePlay.unlockAchievement(Main.A_10KP);
+                if (exp == 100000)
+                    Main.googlePlay.unlockAchievement(Main.A_100KP);
+                if (exp == 500000)
+                    Main.googlePlay.unlockAchievement(Main.A_500KP);
             }
             if (bricks.get(c.i)[c.j] == 0)
                 toDestroy.add(correct.getBody());
@@ -130,6 +137,7 @@ public class BrickGrid {
         world = new World(new Vector2(0, G), true);
         highestMax = highScore.getInteger("score");
         highestExp = highScore.getInteger("exp");
+        playBarHeight = Gdx.graphics.getWidth() / 10;
     }
 
     public void loadSave() {
@@ -138,6 +146,7 @@ public class BrickGrid {
         else {
             max = current.getInteger("max");
             ballsLeft = ballNum = current.getInteger("ballNum");
+            exp = current.getInteger("exp");
             for (int i = 0; i < Math.min(max, maxHeight); i++) {
                 bricks.add(new int[width]);
                 for (int j = 0; j < width; j++) {
@@ -287,6 +296,16 @@ public class BrickGrid {
             highestMax = max;
             highScore.putInteger("score", highestMax);
             highScore.flush();
+            Main.googlePlay.submitScore(Main.L_LV, highestMax);
+            if (max == 100)
+                Main.googlePlay.unlockAchievement(Main.A_LV_100);
+            if (max == 300)
+                Main.googlePlay.unlockAchievement(Main.A_LV_300);
+            if (max == 500)
+                Main.googlePlay.unlockAchievement(Main.A_LV_500);
+        }
+        if (exp == highestExp) {
+            Main.googlePlay.submitScore(Main.L_SCORE, highestExp);
         }
 
         Main.swipeManager.unDrag();
@@ -317,6 +336,7 @@ public class BrickGrid {
         current.putBoolean("saved", true);
         current.putInteger("max", max);
         current.putInteger("ballNum", ballNum);
+        current.putInteger("exp", exp);
         for (int i = 0; i < bricks.size; i++) {
             for (int j = 0; j < width; j++) {
                 current.putInteger("b" + i + j, bricks.get(i)[j]);
@@ -328,10 +348,10 @@ public class BrickGrid {
 
     public void draw(ShapeRenderer sr, float minX, float maxX, float minY, float maxY) {
         sr.setColor(Color.BLACK);
-        sr.line(minX, minY, maxX, minY);
-        sr.line(minX, minY, minX, maxY);
-        sr.line(minX, maxY, maxX, maxY);
-        sr.line(maxX, minY, maxX, maxY);
+        sr.rectLine(minX, minY, maxX, minY, 2);
+        sr.rectLine(minX, minY, minX, maxY, 2);
+        sr.rectLine(minX, maxY, maxX, maxY, 2);
+        sr.rectLine(maxX, minY, maxX, maxY, 2);
         float blockWidth = (maxX - minX) / width, blockHeight = (maxY - minY) / (maxHeight + 1);
         float currentHeight = blockHeight * (maxHeight - bricks.size) + minY;
         for (int i = 0; i < bricks.size; i++) {
@@ -362,6 +382,9 @@ public class BrickGrid {
             Vector2 pos = b.getPosition();
             sr.circle(pos.x / WORLD_WIDTH * (maxX - minX) + minX, pos.y / WORLD_HEIGHT * (maxY - minY) + minY, BALL_RADIUS / WORLD_HEIGHT * (maxY - minY));
         }
+        sr.setColor(Color.BLACK);
+        sr.rectLine(0, playBarHeight, Gdx.graphics.getWidth(), playBarHeight, 2);
+        sr.rectLine(Gdx.graphics.getWidth() / 2, 0, Gdx.graphics.getWidth() / 2, playBarHeight, 2);
     }
 
     public void drawText(SpriteBatch sb, float minX, float maxX, float minY, float maxY) {
@@ -394,6 +417,13 @@ public class BrickGrid {
         layout = new GlyphLayout(font, "Score: " + exp + " (best: " + highestExp + ")");
         x = (maxX + minX) / 2 + minX - layout.width / 2;
         font.draw(sb, layout, x, maxY + layout.height * 2 + 30);
+
+        font.setColor(Color.BLACK);
+        layout = new GlyphLayout(font, "Achievements");
+        font.draw(sb, layout, Gdx.graphics.getWidth() / 4 - layout.width / 2, playBarHeight / 2 + layout.height / 2);
+        font.setColor(Color.BLACK);
+        layout = new GlyphLayout(font, "Leaderboards");
+        font.draw(sb, layout, Gdx.graphics.getWidth() / 4 * 3 - layout.width / 2, playBarHeight / 2 + layout.height / 2);
     }
 
     public void drawSimulation(ShapeRenderer sr, float minX, float maxX, float minY, float maxY, float x, float y) {

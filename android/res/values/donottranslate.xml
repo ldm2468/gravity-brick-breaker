@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_id">815748784917</string>
+    <string name="package_name">ldm2468.swipe</string>
+    <string name="achievement_pacifist">CgkIlcaq894XEAIQAg</string>
+    <string name="achievement_10000_points">CgkIlcaq894XEAIQAw</string>
+    <string name="achievement_100000_points">CgkIlcaq894XEAIQBA</string>
+    <string name="achievement_500000_points">CgkIlcaq894XEAIQBQ</string>
+    <string name="achievement_level_100">CgkIlcaq894XEAIQBg</string>
+    <string name="achievement_level_300">CgkIlcaq894XEAIQBw</string>
+    <string name="achievement_level_500">CgkIlcaq894XEAIQCA</string>
+    <string name="leaderboard_high_score">CgkIlcaq894XEAIQAQ</string>
+    <string name="leaderboard_best_level">CgkIlcaq894XEAIQCQ</string>
+</resources>
