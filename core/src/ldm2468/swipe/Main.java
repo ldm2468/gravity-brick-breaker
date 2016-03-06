@@ -52,11 +52,13 @@ public class Main extends ApplicationAdapter {
             brickGrid.push();
         //process swipe
         if (swipeManager.justDragged()) {
-            if (swipeManager.y1 <= brickGrid.playBarHeight && swipeManager.y2 <= brickGrid.playBarHeight) {
-                if (swipeManager.x1 <= Gdx.graphics.getWidth() / 2 && swipeManager.x2 <= Gdx.graphics.getWidth() / 2)
-                    googlePlay.showAchievements();
-                else if (swipeManager.x1 >= Gdx.graphics.getWidth() / 2 && swipeManager.x2 >= Gdx.graphics.getWidth() / 2)
-                    googlePlay.showLeaderboards();
+            if (swipeManager.y1 <= brickGrid.playBarHeight) {
+                if (swipeManager.y2 <= brickGrid.playBarHeight) {
+                    if (swipeManager.x1 <= Gdx.graphics.getWidth() / 2 && swipeManager.x2 <= Gdx.graphics.getWidth() / 2)
+                        googlePlay.showAchievements();
+                    else if (swipeManager.x1 >= Gdx.graphics.getWidth() / 2 && swipeManager.x2 >= Gdx.graphics.getWidth() / 2)
+                        googlePlay.showLeaderboards();
+                }
             } else if (!brickGrid.isRunning)
                 brickGrid.swipe((swipeManager.x2 - swipeManager.x1) / 2f, (swipeManager.y2 - swipeManager.y1) / 2f);
         }
